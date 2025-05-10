@@ -2,7 +2,7 @@
 #include <iostream>
 #include <chrono>
 
-UI::UI()
+UI::UI() : running(true)
 {
 
 }
@@ -12,16 +12,18 @@ UI::~UI()
     UI_Stop();
 }
 
-void UI::UI_Stop() {
+void UI::UI_Stop() 
+{
+
     running = false;
     msgCondVar.notify_all();
     if (consoleThread.joinable()) consoleThread.join();
     if (appThread.joinable()) appThread.join();
+    
 }
 
 void UI::UI_Start(void)
 {
-    running = true;
     consoleThread = std::thread(&UI::UI_Console_Task, this);
     appThread = std::thread(&UI::UI_App_Task, this);
 }
@@ -64,9 +66,18 @@ void UI::UI_Console_Task(void)
     std::cout << "[UI] Console Task Started\n";
     while(running)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        //std::this_thread::sleep_for(std::chrono::milliseconds(100));
         std::string stringInput;
         std::getline(std::cin, stringInput);
+        if (stringInput == "exit")
+        {
+            cout << "[UI] Exit command received.\n";
+            running = false;
+            msgCondVar.notify_all();
+            break;
+        }
+
         if(!stringInput.empty() && UserMessage_CallbackToApplication)
         {
             // Send Message to Dummy Application by means of callback

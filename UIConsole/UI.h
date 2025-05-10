@@ -18,13 +18,14 @@ class UI{
         void UI_Stop(void);
         void UI_SendMessageToUIFramework(const std::string& msg);
         std::function <void(const std::string&)> UserMessage_CallbackToApplication;
+        bool running = true;
 
     private:
         void UI_App_Task(void);
         void UI_Console_Task(void);
         std::thread consoleThread;
         std::thread appThread;
-        bool running = true;
+        
 
         std::mutex queueMutex;
         std::condition_variable msgCondVar;
